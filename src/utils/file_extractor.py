@@ -26,7 +26,7 @@ def extract_and_save_code_files(llm_output: str, target_dir: Union[str, Path]) -
         # Secondary fallback: Extract generic python blocks and name sensibly
         blocks = re.findall(r"```(?:python)?\s*\n([\s\S]*?)```", llm_output)
         if len(blocks) >= 2:
-            f1 = target_path / "insurance_engine.py"
+            f1 = target_path / "domain_engine.py"
             f2 = target_path / "prototype_app.py"
             with open(f1, "w", encoding="utf-8") as f:
                 f.write(blocks[0].strip() + "\n")

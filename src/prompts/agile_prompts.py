@@ -1,10 +1,10 @@
 """System prompts for Agile User Stories, INVEST Check, Sprint Planning, Prototyping, and Testing (Stages 6 to 11)."""
 
 PROMPT_STAGE_6_USER_STORIES = """Role: Senior Agile Product Owner & Requirements Engineer
-Task: Transform the provided Functional Requirements (FRs) and Non-Functional Requirements (NFRs) into a complete, high-quality set of Agile User Story Cards for the system.
+Task: Transform the provided Functional Requirements (FRs) and Non-Functional Requirements (NFRs) into a complete, high-quality set of Agile User Story Cards for the target system.
 
 Format Requirements for EACH User Story:
-1. Story Identifier & Title (e.g., US-01: Real-time Package Customization Engine)
+1. Story Identifier & Title (e.g., US-01: Real-Time Core Processing Engine)
 2. Traceability: Explicitly map to Primary Stakeholder Role(s) and Source Requirement ID(s) (e.g. FR-1.1.2, NFR-2.4.2).
 3. FRONT OF THE CARD:
    - User Story Statement: "As a <stakeholder/role>, I want <specific capability/feature>, so that <measurable business or user benefit>."
@@ -13,7 +13,7 @@ Format Requirements for EACH User Story:
 4. BACK OF THE CARD:
    - Acceptance Criteria: Structured in 'Given-When-Then' format or clear, verifiable checklist bullets.
    - Business Rules & Validation Constraints: Specific business logic, boundary conditions, and validation rules.
-   - Error Handling & Edge Cases: Explicit behavior when invalid inputs, conflict rules, or budget constraints trigger.
+   - Error Handling & Edge Cases: Explicit behavior when invalid inputs, conflict rules, or operational constraints trigger.
 
 Cover all primary system capabilities cleanly and comprehensively.
 """
@@ -59,7 +59,7 @@ Propose, evaluate, and justify the most suitable technology stack for building a
 
 Provide:
 1. Recommended Architecture & Tech Stack:
-   - Recommend a clean, modular architecture: Pure Python domain engine (`<domain>_engine.py`) paired with an interactive **Streamlit Web Application** (`prototype_app.py`).
+   - Recommend a clean, modular architecture: Pure Python domain engine (`domain_engine.py` or `<domain>_engine.py`) paired with an interactive **Streamlit Web Application** (`prototype_app.py`).
 2. Technical Justification:
    - Explain why this stack fits the scenario (instant reactivity under 2s, interactive widgets, clear state management, zero-friction local execution, direct pytest compatibility).
 3. Trade-off Comparison: Compare against alternative architectures (e.g. FastAPI + React, Flask + Tailwind, CLI tool) and highlight pros/cons.
@@ -70,11 +70,11 @@ PROMPT_STAGE_9_PROTOTYPE = """Role: Lead Full-Stack Python Engineer & Streamlit 
 Task: Generate complete, fully functional, and executable prototype code implementing all user stories from the selected sprint.
 
 MANDATORY GUIDELINES & STREAMLIT BEST PRACTICES:
-1. You must generate REAL, COMPLETE, RUNNABLE Python code. Do NOT output stubs, pseudocode, placeholders, or ellipsis (...).
+1. You must generate REAL, COMPLETE, RUNNABLE Python code tailored strictly to the current scenario domain. Do NOT output stubs, pseudocode, placeholders, or ellipsis (...).
 2. Separate the code into TWO modular files in labeled markdown code blocks:
 
-FILE 1: `insurance_engine.py` (or `<domain>_engine.py`):
-- Pure Python business logic, data models, calculation algorithms, validation matrices, and constraint filters.
+FILE 1: `domain_engine.py` (or `<domain>_engine.py`):
+- Pure Python business logic, data models, calculation algorithms, validation matrices, and constraint filters for this specific domain.
 - Decoupled from UI for deterministic testing and reuse.
 
 FILE 2: `prototype_app.py`:
@@ -92,7 +92,7 @@ FILE 2: `prototype_app.py`:
 
 Format output with markdown code blocks:
 ```python
-# filename: insurance_engine.py
+# filename: domain_engine.py
 ...
 ```
 ```python
@@ -111,7 +111,7 @@ Task: Based on the acceptance criteria of the selected sprint user stories and t
    - Execution Steps
    - Expected Output & Pass/Fail Criteria
 2. Executable Pytest Test Suite (`test_prototype.py`):
-   - Real, runnable Python unit tests using `pytest` importing the domain engine.
+   - Real, runnable Python unit tests using `pytest` importing the domain engine (`domain_engine` or `<domain>_engine`).
    - Comprehensive test assertions verifying core business formulas, validation matrices, edge cases, and constraint bounds.
 
 Enclose the pytest script in a markdown code block labeled `# filename: test_prototype.py`.
