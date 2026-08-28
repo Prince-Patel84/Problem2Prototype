@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Generator
 from pathlib import Path
 from .base_stage import BaseStage
 from ..prompts.agile_prompts import PROMPT_STAGE_9_TECH_STACK, PROMPT_STAGE_9_PROTOTYPE
@@ -13,11 +13,15 @@ class Stage9Prototype(BaseStage):
         return PROMPT_STAGE_9_PROTOTYPE
 
     def recommend_tech_stack(self, sprint_context: str) -> str:
-        """Executes Sub-stage 9A: Tech stack recommendation."""
+        """Executes Sub-stage 9A: Tech stack recommendation synchronously."""
         return self.llm.invoke(PROMPT_STAGE_9_TECH_STACK, f"Selected Sprint Stories:\n{sprint_context}")
 
+    def recommend_tech_stack_stream(self, sprint_context: str) -> Generator[str, None, None]:
+        """Streams Sub-stage 9A: Tech stack recommendation in real-time."""
+        yield from self.llm.stream(PROMPT_STAGE_9_TECH_STACK, f"Selected Sprint Stories:\n{sprint_context}")
+
     def negotiate_tech_stack(self, previous_discussion: str, developer_input: str) -> str:
-        """Conducts Sub-stage 9A: Architect-Developer negotiation."""
+        """Conducts Sub-stage 9A: Architect-Developer negotiation synchronously."""
         negotiation_system_prompt = (
             "Role: Principal Software Architect\n"
             "Task: Discuss the tech stack choice with the developer. Address their questions, analyze trade-offs of their proposed stack versus the recommended one, "
@@ -26,10 +30,25 @@ class Stage9Prototype(BaseStage):
         negotiation_user_prompt = f"Previous Discussion:\n{previous_discussion}\n\nDeveloper Feedback:\n{developer_input}"
         return self.llm.invoke(negotiation_system_prompt, negotiation_user_prompt)
 
+    def negotiate_tech_stack_stream(self, previous_discussion: str, developer_input: str) -> Generator[str, None, None]:
+        """Streams Sub-stage 9A: Architect-Developer negotiation in real-time."""
+        negotiation_system_prompt = (
+            "Role: Principal Software Architect\n"
+            "Task: Discuss the tech stack choice with the developer. Address their questions, analyze trade-offs of their proposed stack versus the recommended one, "
+            "and finalize the agreed tech stack architecture for the prototype."
+        )
+        negotiation_user_prompt = f"Previous Discussion:\n{previous_discussion}\n\nDeveloper Feedback:\n{developer_input}"
+        yield from self.llm.stream(negotiation_system_prompt, negotiation_user_prompt)
+
     def generate_code(self, sprint_context: str, tech_stack_agreement: str) -> str:
-        """Executes Sub-stage 9B: Generates complete executable prototype code."""
+        """Executes Sub-stage 9B: Generates complete executable prototype code synchronously."""
         prompt_input = f"Approved Sprint Context:\n{sprint_context}\n\nAgreed Tech Stack Architecture:\n{tech_stack_agreement}"
         return self.llm.invoke(PROMPT_STAGE_9_PROTOTYPE, prompt_input)
+
+    def generate_code_stream(self, sprint_context: str, tech_stack_agreement: str) -> Generator[str, None, None]:
+        """Streams Sub-stage 9B: Generates complete executable prototype code in real-time."""
+        prompt_input = f"Approved Sprint Context:\n{sprint_context}\n\nAgreed Tech Stack Architecture:\n{tech_stack_agreement}"
+        yield from self.llm.stream(PROMPT_STAGE_9_PROTOTYPE, prompt_input)
 
     def extract_and_save(self, code_output: str, target_dir: Path) -> List[Path]:
         """Saves generated code files directly to disk."""

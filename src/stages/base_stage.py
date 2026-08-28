@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Generator
 from ..core.llm_service import LLMService, get_llm_service
 
 class BaseStage(ABC):
@@ -17,9 +17,17 @@ class BaseStage(ABC):
         pass
 
     def execute(self, input_data: str) -> str:
-        """Executes the initial prompt for this stage."""
+        """Executes the initial prompt for this stage synchronously."""
         return self.llm.invoke(self.system_prompt, f"Input Data / Context:\n{input_data}")
 
+    def execute_stream(self, input_data: str) -> Generator[str, None, None]:
+        """Streams the initial prompt execution tokens in real-time."""
+        yield from self.llm.stream(self.system_prompt, f"Input Data / Context:\n{input_data}")
+
     def refine(self, current_output: str, feedback: str) -> str:
-        """Refines the current output based on user feedback."""
+        """Refines the current output based on user feedback synchronously."""
         return self.llm.refine(current_output, feedback, role_title=f"Agile Specialist ({self.stage_name})")
+
+    def refine_stream(self, current_output: str, feedback: str) -> Generator[str, None, None]:
+        """Streams refined output tokens in real-time."""
+        yield from self.llm.stream_refine(current_output, feedback, role_title=f"Agile Specialist ({self.stage_name})")
