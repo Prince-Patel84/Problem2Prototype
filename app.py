@@ -212,11 +212,11 @@ def render_hitl_stage(title: str, stage_obj, state_key: str, input_data: str, pl
             current_val = st.session_state.get(state_key, "")
             
             if not current_val:
-                st.info(f"Click **Execute {title}** to generate output using local AI.", icon=":material/info:")
+                st.info(f"Click **Execute {title}** to stream output in real-time using local AI.", icon=":material/info:")
                 if st.button(f"Generate {title}", type="primary", icon=":material/play_arrow:"):
-                    with st.spinner("Processing with Hermes 3 on GPU..."):
-                        res = stage_obj.execute(input_data)
-                        st.session_state[state_key] = res
+                    with st.spinner("Streaming response token-by-token from GPU..."):
+                        streamed_text = st.write_stream(stage_obj.execute_stream(input_data))
+                        st.session_state[state_key] = streamed_text
                         save_session_state()
                         st.rerun()
             else:
@@ -245,9 +245,9 @@ def render_hitl_stage(title: str, stage_obj, state_key: str, input_data: str, pl
             with bcol1:
                 if st.button("Refine Output", key=f"refine_{state_key}", icon=":material/auto_fix_high:", use_container_width=True):
                     if feedback.strip() and st.session_state.get(state_key):
-                        with st.spinner("Surgically refining output..."):
-                            refined = stage_obj.refine(st.session_state[state_key], feedback)
-                            st.session_state[state_key] = refined
+                        with st.spinner("Surgically streaming refinements..."):
+                            refined_stream = st.write_stream(stage_obj.refine_stream(st.session_state[state_key], feedback))
+                            st.session_state[state_key] = refined_stream
                             save_session_state()
                             st.rerun()
                     else:
@@ -339,8 +339,9 @@ elif current_idx == 8:
         st.subheader("Architect Recommendation & Negotiation")
         if not st.session_state.stage9a_out:
             if st.button("Generate Tech Stack Proposal", type="primary", icon=":material/architecture:"):
-                with st.spinner("Analyzing sprint stories and evaluating trade-offs..."):
-                    st.session_state.stage9a_out = s9.recommend_tech_stack(sprint_in)
+                with st.spinner("Analyzing sprint stories and streaming recommendation..."):
+                    streamed_stack = st.write_stream(s9.recommend_tech_stack_stream(sprint_in))
+                    st.session_state.stage9a_out = streamed_stack
                     save_session_state()
                     st.rerun()
         else:
@@ -348,7 +349,8 @@ elif current_idx == 8:
             dev_feedback = st.text_input("Developer Suggestion / Alternative Stack Preference", placeholder="e.g., Recommend Streamlit for speed, or negotiate Flask/React...")
             if st.button("Send to Architect for Review", icon=":material/send:"):
                 with st.spinner("Architect analyzing trade-offs..."):
-                    st.session_state.stage9a_out = s9.negotiate_tech_stack(st.session_state.stage9a_out, dev_feedback)
+                    streamed_reply = st.write_stream(s9.negotiate_tech_stack_stream(st.session_state.stage9a_out, dev_feedback))
+                    st.session_state.stage9a_out = streamed_reply
                     save_session_state()
                     st.rerun()
 
@@ -356,10 +358,10 @@ elif current_idx == 8:
         st.subheader("Executable Prototype Code Generation")
         if not st.session_state.stage9b_out:
             if st.button("Generate Executable Prototype Code", type="primary", icon=":material/code:"):
-                with st.spinner("Generating modular Python engine and Streamlit application..."):
-                    code_res = s9.generate_code(sprint_in, st.session_state.stage9a_out)
+                with st.spinner("Streaming modular Python engine and Streamlit application..."):
+                    code_res = st.write_stream(s9.generate_code_stream(sprint_in, st.session_state.stage9a_out))
                     st.session_state.stage9b_out = code_res
-                    saved_files = s9.extract_and_save(code_res, config.prototype_dir)
+                    s9.extract_and_save(code_res, config.prototype_dir)
                     save_session_state()
                     st.rerun()
         else:
@@ -386,8 +388,8 @@ elif current_idx == 9:
     
     if not st.session_state.stage10_out:
         if st.button("Generate Test Cases & Pytest Script", type="primary", icon=":material/bug_report:"):
-            with st.spinner("Generating structured test cases and pytest suite..."):
-                test_res = s10.generate_tests(sprint_in, proto_in)
+            with st.spinner("Streaming structured test cases and pytest suite..."):
+                test_res = st.write_stream(s10.generate_tests_stream(sprint_in, proto_in))
                 st.session_state.stage10_out = test_res
                 s10.extract_and_save(test_res, config.prototype_dir)
                 with open(config.artifacts_dir / "test_specifications.md", "w", encoding="utf-8") as f:
