@@ -14,18 +14,17 @@ class Stage11Testing(BaseStage):
         return PROMPT_STAGE_11_AUTO_HEAL
 
     def run_tests(self, prototype_dir: Path) -> PytestResult:
-        """Runs pytest against prototype test file."""
-        test_file = prototype_dir / "test_prototype.py"
-        return execute_pytest_suite(test_file, working_dir=prototype_dir)
+        """Runs pytest across all test files in the prototype directory."""
+        return execute_pytest_suite(prototype_dir, working_dir=prototype_dir)
 
     def auto_heal(self, pytest_output: str, user_instructions: str, prototype_dir: Path) -> Tuple[str, List[Path]]:
-        """Reads code files, invokes healing LLM, and updates files on disk."""
+        """Reads all code and test files, invokes healing LLM, and updates files on disk."""
         code_context = ""
         for pfile in prototype_dir.glob("*.py"):
             with open(pfile, "r", encoding="utf-8") as f:
                 code_context += f"\n--- Current {pfile.name} ---\n```python\n# filename: {pfile.name}\n" + f.read() + "\n```\n"
 
-        user_content = f"Pytest Failure Output:\n{pytest_output}\n\nUser Instructions / Feedback:\n{user_instructions}\n\nCurrent Code Files:\n{code_context}"
+        user_content = f"Pytest Failure Output:\n{pytest_output}\n\nUser Instructions / Feedback:\n{user_instructions}\n\nCurrent Code & Test Files:\n{code_context}"
         repaired_content = self.llm.invoke(self.system_prompt, user_content)
         saved_files = extract_and_save_code_files(repaired_content, prototype_dir)
         return repaired_content, saved_files

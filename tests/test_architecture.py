@@ -92,10 +92,23 @@ st.title('Test App')
 
 def test_pytest_runner_on_valid_prototype():
     prototype_dir = Path(__file__).resolve().parent.parent / "prototype"
-    test_file = prototype_dir / "test_prototype.py"
-    if test_file.exists():
-        result = execute_pytest_suite(test_file, working_dir=prototype_dir)
+    if prototype_dir.exists():
+        result = execute_pytest_suite(prototype_dir, working_dir=prototype_dir)
         assert isinstance(result, PytestResult)
         assert result.passed is True
         assert result.failed_tests == 0
         assert result.passed_tests > 0
+
+def test_pytest_runner_multi_file_directory(tmp_path):
+    # Create two separate test files in a temporary directory
+    t1 = tmp_path / "test_math.py"
+    t1.write_text("def test_addition():\n    assert 2 + 2 == 4\n", encoding="utf-8")
+    
+    t2 = tmp_path / "test_strings.py"
+    t2.write_text("def test_concat():\n    assert 'a' + 'b' == 'ab'\n", encoding="utf-8")
+    
+    result = execute_pytest_suite(tmp_path, working_dir=tmp_path)
+    assert result.passed is True
+    assert result.passed_tests == 2
+    assert result.failed_tests == 0
+
