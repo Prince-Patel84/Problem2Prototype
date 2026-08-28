@@ -1,6 +1,7 @@
 import os
 import sys
 import io
+import json
 import zipfile
 from pathlib import Path
 import streamlit as st
@@ -38,14 +39,15 @@ st.set_page_config(
 )
 
 # ------------------------------------------------------------------------------
-# SESSION STATE INITIALIZATION
+# AUTO-PERSISTENCE & SESSION STATE
 # ------------------------------------------------------------------------------
-DEFAULT_CASE_STUDY = """LIC, an insurance company, wants to digitize a range of business processes and provide a complete solution that addresses all aspects of the agent-insurer relationship. 
-The first product LIC wants you to develop is a system for creating consolidated insurance packages that can compete with packages provided by other insurance companies. 
-Another product is based on customer priority. Based on the insurance policies available, the customer can create his/her own package by selecting suitable policies and send a request for review. The system has to automatically analyze the proposed package, identify possible issues or restrictions, provide suggestions, and finally give a competing price."""
+DEFAULT_CASE_STUDY = """SmartCare Health Systems wants an intelligent, real-time Emergency Department (ED) Patient Triage and Bed Allocation Platform for a network of urban hospitals.
 
-if "case_study" not in st.session_state:
-    st.session_state.case_study = DEFAULT_CASE_STUDY
+The platform must address the critical issue of emergency overcrowding and delayed ICU admissions:
+1. Patient Ingestion & Dynamic Triage: Nurse staff ingest incoming patient vital signs (SpO2, heart rate, blood pressure, consciousness level) and symptoms to automatically calculate an Emergency Severity Index (ESI Level 1 to 5 triage score) and assign priority queues.
+2. Real-Time Bed & Resource Allocation: The system tracks live availability across Emergency Bays, General Wards, Step-Down Units, and ICUs. It automatically matches prioritized patients to compatible beds based on specialized medical equipment needed (e.g., Ventilator, Dialysis, Cardiac Monitor, Negative Pressure Isolation) and doctor availability.
+3. Overcrowding Alerts & Transfer Protocol: When hospital occupancy crosses 90%, the system flags capacity bottlenecks, recommends intra-ward transfers for stabilizing patients, and generates automated diversion alerts to regional emergency ambulances.
+4. Fast Reactive Dashboard: Triage recommendations and bed assignments must update in real-time under 2.0 seconds with visual status indicators, patient vital metrics, and priority overrides for emergency doctors."""
 
 STAGE_KEYS = [
     "stage1_out", "stage2_out", "stage3_out", "stage4_out", "stage5_out",
@@ -53,23 +55,58 @@ STAGE_KEYS = [
     "stage10_out", "stage11_out"
 ]
 
-for key in STAGE_KEYS:
-    if key not in st.session_state:
-        st.session_state[key] = ""
+STATE_FILE = config.base_dir / ".project_state.json"
 
-if "current_stage_idx" not in st.session_state:
-    st.session_state.current_stage_idx = 0
-
-if "test_results" not in st.session_state:
-    st.session_state.test_results = None
-
-# Auto-load existing Output.txt if available and stage 5 is empty
-output_file = config.base_dir / "Output.txt"
-if output_file.exists() and not st.session_state.stage5_out:
+def save_session_state():
+    """Persists current state to local JSON file so refreshes never lose work."""
+    data = {
+        "case_study": st.session_state.get("case_study", DEFAULT_CASE_STUDY),
+        "current_stage_idx": st.session_state.get("current_stage_idx", 0),
+        **{k: st.session_state.get(k, "") for k in STAGE_KEYS}
+    }
     try:
-        st.session_state.stage5_out = output_file.read_text(encoding="utf-8")
+        with open(STATE_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
     except Exception:
         pass
+
+def load_session_state():
+    """Loads saved state from disk."""
+    if STATE_FILE.exists():
+        try:
+            with open(STATE_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            for k, v in data.items():
+                st.session_state[k] = v
+        except Exception:
+            pass
+
+def reset_session_state():
+    """Clears state and starts a fresh project."""
+    if STATE_FILE.exists():
+        try:
+            STATE_FILE.unlink()
+        except Exception:
+            pass
+    st.session_state.case_study = DEFAULT_CASE_STUDY
+    st.session_state.current_stage_idx = 0
+    for k in STAGE_KEYS:
+        st.session_state[k] = ""
+    st.session_state.test_results = None
+
+# Initialize state on first run
+if "_initialized" not in st.session_state:
+    st.session_state._initialized = True
+    if "case_study" not in st.session_state:
+        st.session_state.case_study = DEFAULT_CASE_STUDY
+    for key in STAGE_KEYS:
+        if key not in st.session_state:
+            st.session_state[key] = ""
+    if "current_stage_idx" not in st.session_state:
+        st.session_state.current_stage_idx = 0
+    if "test_results" not in st.session_state:
+        st.session_state.test_results = None
+    load_session_state()
 
 # Initialize LLM Service (Cached Resource)
 @st.cache_resource
@@ -124,11 +161,18 @@ with st.sidebar:
         
         if st.button(btn_label, key=f"nav_btn_{idx}", type=btn_type, icon=icon, use_container_width=True):
             st.session_state.current_stage_idx = idx
+            save_session_state()
             st.rerun()
 
     st.divider()
-    st.subheader("Deliverables Export")
+    st.subheader("Project State & Export")
+    st.caption("💾 Auto-Save is active. Refreshes preserve your work.")
     
+    # Reset button
+    if st.button("New Project (Reset All)", icon=":material/restart_alt:", use_container_width=True):
+        reset_session_state()
+        st.rerun()
+
     # Create zip export in-memory
     def generate_zip_bundle():
         buf = io.BytesIO()
@@ -137,16 +181,15 @@ with st.sidebar:
                 zf.write(p, arcname=f"artifacts/{p.name}")
             for p in config.prototype_dir.glob("*.*"):
                 zf.write(p, arcname=f"prototype/{p.name}")
-            report_p = config.base_dir / "Report.md"
-            if report_p.exists():
-                zf.write(report_p, arcname="Report.md")
+            if STATE_FILE.exists():
+                zf.write(STATE_FILE, arcname="project_state.json")
         buf.seek(0)
         return buf
 
     st.download_button(
         label="Download Project Zip Bundle",
         data=generate_zip_bundle(),
-        file_name="Lab4_Agile_Requirements_Package.zip",
+        file_name="Problem2Prototype_Project_Package.zip",
         mime="application/zip",
         icon=":material/download:",
         use_container_width=True
@@ -174,6 +217,7 @@ def render_hitl_stage(title: str, stage_obj, state_key: str, input_data: str, pl
                     with st.spinner("Processing with Hermes 3 on GPU..."):
                         res = stage_obj.execute(input_data)
                         st.session_state[state_key] = res
+                        save_session_state()
                         st.rerun()
             else:
                 st.markdown(current_val)
@@ -181,7 +225,8 @@ def render_hitl_stage(title: str, stage_obj, state_key: str, input_data: str, pl
                     edited_text = st.text_area("Direct Editor", value=current_val, height=300, label_visibility="collapsed")
                     if st.button("Save Manual Edits", key=f"save_edit_{state_key}", icon=":material/save:"):
                         st.session_state[state_key] = edited_text
-                        st.success("Manual edits saved!", icon=":material/check:")
+                        save_session_state()
+                        st.success("Manual edits saved & persisted!", icon=":material/check:")
                         st.rerun()
 
     with col_hitl:
@@ -203,6 +248,7 @@ def render_hitl_stage(title: str, stage_obj, state_key: str, input_data: str, pl
                         with st.spinner("Surgically refining output..."):
                             refined = stage_obj.refine(st.session_state[state_key], feedback)
                             st.session_state[state_key] = refined
+                            save_session_state()
                             st.rerun()
                     else:
                         st.warning("Please enter feedback before refining.")
@@ -210,6 +256,7 @@ def render_hitl_stage(title: str, stage_obj, state_key: str, input_data: str, pl
             with bcol2:
                 if st.button("Approve & Next ➔", key=f"approve_{state_key}", type="primary", icon=":material/arrow_forward:", use_container_width=True):
                     st.session_state.current_stage_idx = min(10, current_idx + 1)
+                    save_session_state()
                     st.rerun()
 
 # ------------------------------------------------------------------------------
@@ -221,6 +268,7 @@ with st.expander("📝 Target System / Case Study Specification", expanded=(curr
     case_in = st.text_area("Problem Statement", value=st.session_state.case_study, height=120)
     if st.button("Update Case Study Context", icon=":material/sync:"):
         st.session_state.case_study = case_in
+        save_session_state()
         st.success("Updated active case study!")
 
 # Stage 1: Stakeholders
@@ -251,9 +299,6 @@ elif current_idx == 4:
     s5 = Stage5Requirements(llm)
     in_data = st.session_state.stage4_out or st.session_state.case_study
     render_hitl_stage("Stage 5: Functional & Non-Functional Requirements", s5, "stage5_out", in_data)
-    if st.session_state.stage5_out:
-        with open(config.base_dir / "Output.txt", "w", encoding="utf-8") as f:
-            f.write(st.session_state.stage5_out)
 
 # Stage 6: Agile User Stories
 elif current_idx == 5:
@@ -296,6 +341,7 @@ elif current_idx == 8:
             if st.button("Generate Tech Stack Proposal", type="primary", icon=":material/architecture:"):
                 with st.spinner("Analyzing sprint stories and evaluating trade-offs..."):
                     st.session_state.stage9a_out = s9.recommend_tech_stack(sprint_in)
+                    save_session_state()
                     st.rerun()
         else:
             st.markdown(st.session_state.stage9a_out)
@@ -303,6 +349,7 @@ elif current_idx == 8:
             if st.button("Send to Architect for Review", icon=":material/send:"):
                 with st.spinner("Architect analyzing trade-offs..."):
                     st.session_state.stage9a_out = s9.negotiate_tech_stack(st.session_state.stage9a_out, dev_feedback)
+                    save_session_state()
                     st.rerun()
 
     with t2:
@@ -313,6 +360,7 @@ elif current_idx == 8:
                     code_res = s9.generate_code(sprint_in, st.session_state.stage9a_out)
                     st.session_state.stage9b_out = code_res
                     saved_files = s9.extract_and_save(code_res, config.prototype_dir)
+                    save_session_state()
                     st.rerun()
         else:
             st.markdown(st.session_state.stage9b_out)
@@ -325,6 +373,7 @@ elif current_idx == 8:
                 st.info("To run this prototype in a separate window: `.venv\\Scripts\\streamlit run prototype/prototype_app.py`", icon=":material/terminal:")
                 if st.button("Approve Prototype Code & Proceed to Tests ➔", type="primary", icon=":material/arrow_forward:"):
                     st.session_state.current_stage_idx = 9
+                    save_session_state()
                     st.rerun()
 
 # Stage 10: Test Case Generation
@@ -343,11 +392,13 @@ elif current_idx == 9:
                 s10.extract_and_save(test_res, config.prototype_dir)
                 with open(config.artifacts_dir / "test_specifications.md", "w", encoding="utf-8") as f:
                     f.write("# Generated Test Specifications\n\n" + test_res)
+                save_session_state()
                 st.rerun()
     else:
         st.markdown(st.session_state.stage10_out)
         if st.button("Approve Test Suite & Enter Automated Testing Lab ➔", type="primary", icon=":material/arrow_forward:"):
             st.session_state.current_stage_idx = 10
+            save_session_state()
             st.rerun()
 
 # Stage 11: Automated Testing Lab & Auto-Healing
@@ -366,6 +417,7 @@ elif current_idx == 10:
                     st.session_state.stage11_out = res.output
                     with open(config.artifacts_dir / "test_results.md", "w", encoding="utf-8") as f:
                         f.write(f"# Automated Test Execution Results\n\n```\n{res.output}\n```\n")
+                    save_session_state()
                     st.rerun()
 
         res_obj = st.session_state.test_results
@@ -391,4 +443,5 @@ elif current_idx == 10:
                             new_res = s11.run_tests(config.prototype_dir)
                             st.session_state.test_results = new_res
                             st.session_state.stage11_out = new_res.output
+                            save_session_state()
                             st.rerun()

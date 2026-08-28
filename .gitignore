@@ -30,6 +30,7 @@ ENV/
 .env
 .env.local
 .env.*.local
+.project_state.json
 
 # IDE & Tool Folders
 .vscode/
