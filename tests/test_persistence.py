@@ -1,12 +1,9 @@
 import json
-import pytest
-from pathlib import Path
 import sys
+from pathlib import Path
 
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from src.core.config import get_config
 
 def test_session_state_persistence(tmp_path):
     state_file = tmp_path / ".project_state.json"
