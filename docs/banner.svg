@@ -1,0 +1,143 @@
+<svg width="1280" height="420" viewBox="0 0 1280 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16" />
+      <stop offset="50%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+
+    <!-- Title Gradient -->
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#818cf8" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+
+    <!-- Card Background Gradient -->
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.9" />
+    </linearGradient>
+
+    <!-- Glowing Accent -->
+    <radialGradient id="glow" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Drop Shadow Filter -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <!-- Background Layer -->
+  <rect width="1280" height="420" rx="16" fill="url(#bgGrad)" />
+  <rect width="1280" height="420" rx="16" fill="url(#glow)" />
+
+  <!-- Outer Border -->
+  <rect x="1" y="1" width="1278" height="418" rx="15" stroke="#334155" stroke-width="1.5" stroke-opacity="0.6" fill="none" />
+
+  <!-- Subtle Tech Grid Lines -->
+  <g opacity="0.08" stroke="#ffffff" stroke-width="1">
+    <line x1="0" y1="70" x2="1280" y2="70" />
+    <line x1="0" y1="140" x2="1280" y2="140" />
+    <line x1="0" y1="210" x2="1280" y2="210" />
+    <line x1="0" y1="280" x2="1280" y2="280" />
+    <line x1="0" y1="350" x2="1280" y2="350" />
+    <line x1="213" y1="0" x2="213" y2="420" />
+    <line x1="426" y1="0" x2="426" y2="420" />
+    <line x1="640" y1="0" x2="640" y2="420" />
+    <line x1="853" y1="0" x2="853" y2="420" />
+    <line x1="1066" y1="0" x2="1066" y2="420" />
+  </g>
+
+  <!-- Top Badge -->
+  <g transform="translate(485, 38)">
+    <rect width="310" height="32" rx="16" fill="#1e293b" stroke="#38bdf8" stroke-width="1" stroke-opacity="0.5" />
+    <text x="155" y="21" fill="#38bdf8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle" letter-spacing="1">⚡ 100% LOCAL GPU AI STUDIO</text>
+  </g>
+
+  <!-- Main Logo & Title -->
+  <text x="640" y="125" fill="url(#titleGrad)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="48" font-weight="800" text-anchor="middle" letter-spacing="-0.5">Problem2Prototype</text>
+  
+  <!-- Subtitle / Tagline -->
+  <text x="640" y="165" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="middle">From Raw Problem Statements to Verified Executable Prototypes in Minutes</text>
+
+  <!-- Interactive Workflow Pipeline Cards -->
+  <g transform="translate(100, 210)" filter="url(#shadow)">
+    
+    <!-- Step 1 -->
+    <g transform="translate(0, 0)">
+      <rect width="180" height="90" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.2" />
+      <circle cx="35" cy="32" r="14" fill="#0284c7" fill-opacity="0.2" />
+      <text x="35" y="37" fill="#38bdf8" font-size="14" text-anchor="middle">💡</text>
+      <text x="58" y="36" fill="#f8fafc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700">Problem</text>
+      <text x="20" y="65" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12">Raw Spec / Idea</text>
+    </g>
+
+    <!-- Arrow 1 -->
+    <path d="M 195 45 L 215 45 M 210 40 L 215 45 L 210 50" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Step 2 -->
+    <g transform="translate(230, 0)">
+      <rect width="180" height="90" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.2" />
+      <circle cx="35" cy="32" r="14" fill="#6366f1" fill-opacity="0.2" />
+      <text x="35" y="37" fill="#818cf8" font-size="14" text-anchor="middle">📋</text>
+      <text x="58" y="36" fill="#f8fafc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700">Elicitation</text>
+      <text x="20" y="65" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12">ISO/IEC 25010 FRs</text>
+    </g>
+
+    <!-- Arrow 2 -->
+    <path d="M 425 45 L 445 45 M 440 40 L 445 45 L 440 50" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Step 3 -->
+    <g transform="translate(460, 0)">
+      <rect width="180" height="90" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.2" />
+      <circle cx="35" cy="32" r="14" fill="#a855f7" fill-opacity="0.2" />
+      <text x="35" y="37" fill="#c084fc" font-size="14" text-anchor="middle">🏃</text>
+      <text x="58" y="36" fill="#f8fafc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700">Agile Cards</text>
+      <text x="20" y="65" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12">INVEST &amp; Sprints</text>
+    </g>
+
+    <!-- Arrow 3 -->
+    <path d="M 655 45 L 675 45 M 670 40 L 675 45 L 670 50" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Step 4 -->
+    <g transform="translate(690, 0)">
+      <rect width="180" height="90" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.2" />
+      <circle cx="35" cy="32" r="14" fill="#ec4899" fill-opacity="0.2" />
+      <text x="35" y="37" fill="#f472b6" font-size="14" text-anchor="middle">💻</text>
+      <text x="58" y="36" fill="#f8fafc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700">Prototype</text>
+      <text x="20" y="65" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12">Streamlit Web App</text>
+    </g>
+
+    <!-- Arrow 4 -->
+    <path d="M 885 45 L 905 45 M 900 40 L 905 45 L 900 50" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Step 5 -->
+    <g transform="translate(920, 0)">
+      <rect width="160" height="90" rx="12" fill="url(#cardGrad)" stroke="#10b981" stroke-width="1.5" />
+      <circle cx="35" cy="32" r="14" fill="#10b981" fill-opacity="0.2" />
+      <text x="35" y="37" fill="#34d399" font-size="14" text-anchor="middle">🧪</text>
+      <text x="58" y="36" fill="#34d399" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700">Verified</text>
+      <text x="20" y="65" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12">100% Pytest Pass</text>
+    </g>
+  </g>
+
+  <!-- Bottom Feature Pills -->
+  <g transform="translate(260, 345)">
+    <rect x="0" y="0" width="170" height="28" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1" />
+    <text x="85" y="18" fill="#cbd5e1" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="500" text-anchor="middle">🚀 Hermes 3 / Qwen 2.5</text>
+
+    <rect x="185" y="0" width="170" height="28" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1" />
+    <text x="270" y="18" fill="#cbd5e1" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="500" text-anchor="middle">🔒 Zero-API Offline Run</text>
+
+    <rect x="370" y="0" width="180" height="28" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1" />
+    <text x="460" y="18" fill="#cbd5e1" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="500" text-anchor="middle">🤝 Human-In-The-Loop</text>
+
+    <rect x="565" y="0" width="175" height="28" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1" />
+    <text x="652" y="18" fill="#cbd5e1" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="500" text-anchor="middle">🛠️ Live AI Auto-Healing</text>
+  </g>
+</svg>
