@@ -86,6 +86,7 @@ FILE 2: `prototype_app.py`:
   * Use `st.container(horizontal=True)` or responsive column layouts.
   * Do NOT use deprecated `use_container_width`.
   * Do NOT inject custom CSS unless specifically requested; use native Streamlit layout features.
+  * **CRITICAL**: Maintain interactive state across button clicks using `st.session_state` (e.g. `if 'manager' not in st.session_state: st.session_state.manager = TaskManager()`) so user data and task lists persist properly across reruns.
   * Include interactive controls (sliders, selects, segmented controls, multiselects, number inputs).
   * Provide real-time metric cards (`st.metric`), status indicators (`st.success`, `st.error`, `st.info`), and progress bars.
   * Include data export/download functionality (`st.download_button`).

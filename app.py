@@ -41,13 +41,13 @@ st.set_page_config(
 # ------------------------------------------------------------------------------
 # AUTO-PERSISTENCE & SESSION STATE
 # ------------------------------------------------------------------------------
-DEFAULT_CASE_STUDY = """SmartCare Health Systems wants an intelligent, real-time Emergency Department (ED) Patient Triage and Bed Allocation Platform for a network of urban hospitals.
+DEFAULT_CASE_STUDY = """TaskFlow: A Smart Todo and Personal Task Management Application.
 
-The platform must address the critical issue of emergency overcrowding and delayed ICU admissions:
-1. Patient Ingestion & Dynamic Triage: Nurse staff ingest incoming patient vital signs (SpO2, heart rate, blood pressure, consciousness level) and symptoms to automatically calculate an Emergency Severity Index (ESI Level 1 to 5 triage score) and assign priority queues.
-2. Real-Time Bed & Resource Allocation: The system tracks live availability across Emergency Bays, General Wards, Step-Down Units, and ICUs. It automatically matches prioritized patients to compatible beds based on specialized medical equipment needed (e.g., Ventilator, Dialysis, Cardiac Monitor, Negative Pressure Isolation) and doctor availability.
-3. Overcrowding Alerts & Transfer Protocol: When hospital occupancy crosses 90%, the system flags capacity bottlenecks, recommends intra-ward transfers for stabilizing patients, and generates automated diversion alerts to regional emergency ambulances.
-4. Fast Reactive Dashboard: Triage recommendations and bed assignments must update in real-time under 2.0 seconds with visual status indicators, patient vital metrics, and priority overrides for emergency doctors."""
+The application should help individual professionals and small teams organize their daily workflows:
+1. Task Creation & Categorization: Users can add tasks with a title, description, due date, category (Work, Personal, Urgent, Learning), and priority level (High, Medium, Low).
+2. State & Lifecycle Tracking: Tasks move through status stages (To Do, In Progress, Completed). Users can filter and search tasks by status, due date, or priority.
+3. Subtasks & Checklist: Users can break larger tasks into checklist items with progress percentage tracking.
+4. Smart Daily Summary & Export: A clean dashboard showing pending vs completed tasks, overdue warnings with visual badges, and the ability to export the task list to CSV/Markdown."""
 
 STAGE_KEYS = [
     "stage1_out", "stage2_out", "stage3_out", "stage4_out", "stage5_out",
@@ -82,10 +82,16 @@ def load_session_state():
             pass
 
 def reset_session_state():
-    """Clears state and starts a fresh project."""
+    """Clears state, removes stale prototype files, and starts a fresh project."""
     if STATE_FILE.exists():
         try:
             STATE_FILE.unlink()
+        except Exception:
+            pass
+    # Clean up stale files in prototype/
+    for p in config.prototype_dir.glob("*.py"):
+        try:
+            p.unlink()
         except Exception:
             pass
     st.session_state.case_study = DEFAULT_CASE_STUDY
@@ -166,7 +172,7 @@ with st.sidebar:
 
     st.divider()
     st.subheader("Project State & Export")
-    st.caption("💾 Auto-Save is active. Refreshes preserve your work.")
+    st.caption("💾 Auto-Save active. Refreshes preserve your work.")
     
     # Reset button
     if st.button("New Project (Reset All)", icon=":material/restart_alt:", use_container_width=True):
@@ -373,6 +379,20 @@ elif current_idx == 8:
                     st.write(f"- `{pfile.name}` ({pfile.stat().st_size} bytes)")
                 
                 st.info("To run this prototype in a separate window: `.venv\\Scripts\\streamlit run prototype/prototype_app.py`", icon=":material/terminal:")
+                
+                # Direct Code Refinement in Stage 9B
+                with st.expander("🛠️ Refine / Fix Code with Feedback (HITL)", expanded=False):
+                    code_refine_instr = st.text_area("Code Fix / Refinement Prompt", placeholder="e.g. Ensure task state is stored in st.session_state, or paste runtime error...", height=100)
+                    if st.button("Refine Code with AI", icon=":material/auto_fix_high:"):
+                        if code_refine_instr.strip():
+                            with st.spinner("AI surgically refining code..."):
+                                refined_code = s9.refine(st.session_state.stage9b_out, code_refine_instr)
+                                st.session_state.stage9b_out = refined_code
+                                s9.extract_and_save(refined_code, config.prototype_dir)
+                                save_session_state()
+                                st.success("Code updated on disk!")
+                                st.rerun()
+
                 if st.button("Approve Prototype Code & Proceed to Tests ➔", type="primary", icon=":material/arrow_forward:"):
                     st.session_state.current_stage_idx = 9
                     save_session_state()
@@ -431,19 +451,22 @@ elif current_idx == 10:
                 
             st.code(res_obj.output, language="text")
             
-            # AI Auto-Healing Section
-            if not res_obj.passed:
-                with st.container(border=True):
-                    st.subheader("🛠️ AI Auto-Healing & Code Repair")
-                    st.markdown("Instruct the AI on how to repair the failing tests or trigger automated code diagnosis.")
-                    heal_instr = st.text_input("Custom Repair Instructions (Optional)", placeholder="e.g. Fix formula calculation in insurance_engine.py")
-                    if st.button("Trigger AI Auto-Healing", type="primary", icon=":material/healing:"):
-                        with st.spinner("AI analyzing test traceback and repairing code..."):
-                            rep_code, updated_files = s11.auto_heal(res_obj.output, heal_instr or "auto", config.prototype_dir)
-                            st.success(f"Updated code on disk: {[f.name for f in updated_files]}")
-                            # Auto re-run pytest
-                            new_res = s11.run_tests(config.prototype_dir)
-                            st.session_state.test_results = new_res
-                            st.session_state.stage11_out = new_res.output
-                            save_session_state()
-                            st.rerun()
+        # AI Auto-Healing Section (Always accessible so users can report UI runtime errors!)
+        with st.container(border=True):
+            st.subheader("🛠️ AI Auto-Healing & Code Repair Lab")
+            st.markdown("Instruct the AI to fix runtime errors, Streamlit UI state bugs, formula discrepancies, or add features.")
+            heal_instr = st.text_area(
+                "Custom Repair / Refinement Instructions",
+                placeholder="e.g. In prototype_app.py, store TaskManager in st.session_state so tasks persist across button clicks, or paste runtime traceback...",
+                height=100
+            )
+            if st.button("Trigger AI Code Healing & Auto-Repair", type="primary", icon=":material/healing:"):
+                with st.spinner("AI analyzing codebase, tracebacks, and repairing files on disk..."):
+                    rep_code, updated_files = s11.auto_heal(res_obj.output if res_obj else "Manual UI Refinement Request", heal_instr or "auto", config.prototype_dir)
+                    st.success(f"Successfully repaired and updated code on disk: {[f.name for f in updated_files]}")
+                    # Auto re-run pytest
+                    new_res = s11.run_tests(config.prototype_dir)
+                    st.session_state.test_results = new_res
+                    st.session_state.stage11_out = new_res.output
+                    save_session_state()
+                    st.rerun()
